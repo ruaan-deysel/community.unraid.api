@@ -1,0 +1,17 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Cache Usage"
+  },
+  "units": "%",
+  "insights": true,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "uiQuickAction": false,
+  "icon": "/assets/icons/cache.svg",
+  "min": 0,
+  "max": 100,
+  "step": 1,
+  "decimals": 0
+}

@@ -1437,6 +1437,23 @@
       "step": 0.1,
       "icon": "/assets/icons/storage.svg"
     },
+    "cache_usage": {
+      "type": "number",
+      "title": {
+        "en": "Cache Usage"
+      },
+      "units": "%",
+      "insights": true,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "uiQuickAction": false,
+      "icon": "/assets/icons/cache.svg",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "decimals": 0
+    },
     "containers_running": {
       "type": "number",
       "title": {
@@ -1572,6 +1589,443 @@
       "max": 100,
       "step": 1,
       "icon": "/assets/icons/disk-temp.svg"
+    },
+    "disk1_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 1 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk10_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 10 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk11_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 11 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk12_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 12 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk13_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 13 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk14_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 14 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk15_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 15 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk16_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 16 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk17_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 17 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk18_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 18 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk19_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 19 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk2_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 2 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk20_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 20 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk21_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 21 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk22_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 22 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk23_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 23 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk24_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 24 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk25_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 25 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk26_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 26 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk27_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 27 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk28_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 28 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk29_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 29 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk3_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 3 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk30_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 30 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk4_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 4 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk5_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 5 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk6_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 6 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk7_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 7 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk8_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 8 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "disk9_usage": {
+      "type": "number",
+      "title": {
+        "en": "Disk 9 Usage"
+      },
+      "units": "%",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/icons/storage.svg"
+    },
+    "flash_usage": {
+      "type": "number",
+      "title": {
+        "en": "Flash Usage"
+      },
+      "units": "%",
+      "insights": true,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "uiQuickAction": false,
+      "icon": "/assets/icons/flash.svg",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "decimals": 0
     },
     "memory_usage": {
       "type": "number",

@@ -140,6 +140,8 @@ async onInit(): Promise<void> {
   /**
    * Ensure all required capabilities are registered on the device
    * This handles upgrades when new capabilities are added
+   * Note: Disk usage capabilities (disk1_usage - disk30_usage) are added dynamically
+   * based on actual disks present in the array
    */
   private async ensureCapabilities(): Promise<void> {
     const requiredCapabilities = [
@@ -168,10 +170,42 @@ async onInit(): Promise<void> {
       'ups_runtime',
     ];
 
+    // Remove old disk_usage_summary capability if present
+    if (this.hasCapability('disk_usage_summary')) {
+      this.log('Removing deprecated capability: disk_usage_summary');
+      await this.removeCapability('disk_usage_summary');
+    }
+
     for (const capability of requiredCapabilities) {
       if (!this.hasCapability(capability)) {
         this.log(`Adding missing capability: ${capability}`);
         await this.addCapability(capability);
+      }
+    }
+  }
+
+  /**
+   * Dynamically manage disk usage capabilities based on actual disks
+   * Adds capabilities for disks that exist, removes ones that don't
+   */
+  private async updateDiskCapabilities(diskCount: number): Promise<void> {
+    const MAX_DISKS = 30;
+
+    // Add capabilities for disks that exist
+    for (let i = 1; i <= diskCount && i <= MAX_DISKS; i++) {
+      const capName = `disk${i}_usage`;
+      if (!this.hasCapability(capName)) {
+        this.log(`Adding disk capability: ${capName}`);
+        await this.addCapability(capName);
+      }
+    }
+
+    // Remove capabilities for disks that don't exist
+    for (let i = diskCount + 1; i <= MAX_DISKS; i++) {
+      const capName = `disk${i}_usage`;
+      if (this.hasCapability(capName)) {
+        this.log(`Removing disk capability: ${capName}`);
+        await this.removeCapability(capName);
       }
     }
   }
@@ -410,11 +444,24 @@ async onInit(): Promise<void> {
   /**
    * Poll storage metrics (array status, capacity, parity)
    * 
-   * IMPORTANT: This query is designed to NOT wake sleeping disks.
-   * We use array.disks which provides disk state without accessing
-   * the physical disk. Temperature is only returned for spinning disks
-   * (returns null for standby disks). We do NOT query SMART data or
-   * the physical 'disks' endpoint as those would wake sleeping disks.
+   * DISK STANDBY SAFETY:
+   * This query is specifically designed to NOT wake sleeping disks and NOT
+   * prevent disks from entering standby mode (same approach as Home Assistant
+   * Unraid integration).
+   * 
+   * Safe queries (we use these):
+   * - array.disks: Returns disk state from Unraid's memory cache
+   * - fsSize/fsFree/fsUsed: Filesystem stats cached in memory
+   * - isSpinning: Reports spin state without disk access
+   * - temp: Returns null for standby disks, only shows temp for spinning disks
+   * 
+   * Unsafe queries (we avoid these):
+   * - Root 'disks' query: Accesses physical disk SMART data, wakes disks
+   * - Any SMART attribute queries: Requires disk to spin up
+   * 
+   * The filesystem usage stats are maintained by Unraid in memory from the
+   * last time the disk was mounted/accessed. Querying them does NOT require
+   * reading from the physical disk.
    */
   private async pollStorageMetrics(): Promise<void> {
     if (!this.apiConfig) {
@@ -425,6 +472,7 @@ async onInit(): Promise<void> {
     // Note: isSpinning is included to track disk standby state
     // This field is returned by the API without waking the disk
     // fsSize, fsFree, fsUsed provide individual disk usage data
+    // boot = flash USB boot device, caches = cache pool (NVMe/SSD)
     const responseSchema = z.object({
       array: z.object({
         state: z.string(),
@@ -441,6 +489,18 @@ async onInit(): Promise<void> {
           running: z.boolean().nullable(),
           errors: z.number().nullable().optional(),
         }),
+        boot: z.object({
+          name: z.string(),
+          fsSize: z.number().nullable(),
+          fsFree: z.number().nullable(),
+          fsUsed: z.number().nullable(),
+        }).nullable().optional(),
+        caches: z.array(z.object({
+          name: z.string(),
+          fsSize: z.number().nullable(),
+          fsFree: z.number().nullable(),
+          fsUsed: z.number().nullable(),
+        })).optional(),
         disks: z.array(z.object({
           id: z.string(),
           name: z.string(),
@@ -457,10 +517,12 @@ async onInit(): Promise<void> {
 
     type StorageResponse = z.infer<typeof responseSchema>;
 
-    // Query array.disks - this does NOT wake sleeping disks
-    // Temperature is only populated for spinning disks (null for standby)
-    // isSpinning tells us if disk is active without waking it
-    // fsSize, fsFree, fsUsed provide individual disk usage
+    // DISK STANDBY SAFE: Using array.disks (memory-cached) NOT root disks query
+    // - fsSize/fsFree/fsUsed: Cached stats, no disk access required
+    // - isSpinning: Reports state without waking disk
+    // - temp: null for standby disks, only populated when already spinning
+    // - boot: Flash USB (always on, no standby)
+    // - caches: NVMe/SSD cache pool (no standby typically)
     const query = `
       query {
         array {
@@ -477,6 +539,18 @@ async onInit(): Promise<void> {
             progress
             running
             errors
+          }
+          boot {
+            name
+            fsSize
+            fsFree
+            fsUsed
+          }
+          caches {
+            name
+            fsSize
+            fsFree
+            fsUsed
           }
           disks {
             id
@@ -616,6 +690,61 @@ async onInit(): Promise<void> {
           this.highUsageDisks.delete(disk.name);
         }
       });
+
+      // Count data disks (disks with filesystem usage)
+      const dataDisks = result.array.disks.filter(
+        disk => disk.fsSize && disk.fsSize > 0 && disk.fsUsed !== null,
+      );
+
+      // Dynamically add/remove disk capabilities based on actual disk count
+      await this.updateDiskCapabilities(dataDisks.length);
+
+      // Update individual disk usage capabilities
+      let diskIndex = 1;
+      for (const disk of dataDisks) {
+        const usagePercent = Math.round((disk.fsUsed! / disk.fsSize!) * 100);
+        const capabilityName = `disk${diskIndex}_usage`;
+        if (this.hasCapability(capabilityName)) {
+          await this.setCapabilityValue(capabilityName, usagePercent);
+        }
+        diskIndex++;
+      }
+
+      // Update cache pool usage (NVMe/SSD cache)
+      // Dynamically add/remove cache_usage capability based on presence
+      if (result.array.caches && result.array.caches.length > 0) {
+        const cache = result.array.caches[0]; // Primary cache pool
+        if (cache.fsSize && cache.fsSize > 0 && cache.fsUsed !== null) {
+          // Ensure capability exists
+          if (!this.hasCapability('cache_usage')) {
+            await this.addCapability('cache_usage');
+            this.log('Added cache_usage capability');
+          }
+          const cacheUsagePercent = Math.round((cache.fsUsed / cache.fsSize) * 100);
+          await this.setCapabilityValue('cache_usage', cacheUsagePercent);
+        }
+      } else if (this.hasCapability('cache_usage')) {
+        // Remove cache capability if no cache pool
+        await this.removeCapability('cache_usage');
+        this.log('Removed cache_usage capability (no cache pool)');
+      }
+
+      // Update flash (USB boot device) usage
+      // Dynamically add/remove flash_usage capability based on presence
+      if (result.array.boot && result.array.boot.fsSize && result.array.boot.fsSize > 0) {
+        if (!this.hasCapability('flash_usage')) {
+          await this.addCapability('flash_usage');
+          this.log('Added flash_usage capability');
+        }
+        const flashUsagePercent = Math.round(
+          ((result.array.boot.fsUsed ?? 0) / result.array.boot.fsSize) * 100,
+        );
+        await this.setCapabilityValue('flash_usage', flashUsagePercent);
+      } else if (this.hasCapability('flash_usage')) {
+        // Remove flash capability if boot info unavailable
+        await this.removeCapability('flash_usage');
+        this.log('Removed flash_usage capability');
+      }
 
       // Check disk health - DISK_OK is healthy status
       const unhealthyDisks = result.array.disks.filter(
