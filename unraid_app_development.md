@@ -1,3 +1,132 @@
+## VS Code Dev Container for Homey App Development
+
+Prerequisites on your Mac:
+
+- Docker Desktop installed and running.
+- VS Code with the Dev Containers extension.
+
+This repository includes a dev container that provides:
+
+- Node.js v18 (and NPM)
+- Homey CLI installed globally (`homey`)
+- Access to the host Docker daemon from inside the container
+
+### Open in Dev Container
+
+1. Open this repo in VS Code.
+2. Run “Dev Containers: Reopen in Container” from the Command Palette.
+3. Wait for post-create to finish (it installs Homey CLI).
+
+### Verify tooling
+
+```bash
+homey --version
+node -v
+npm -v
+```
+
+### Sign in to Homey
+
+```bash
+homey login
+```
+
+### Run your app locally
+
+```bash
+homey app run
+```
+
+### Test/build (examples)
+
+```bash
+# Run tests if your app defines them
+homey app test
+
+# Create a build (if relevant to your flow)
+homey app build
+```
+
+Notes:
+
+- For Homey Cloud or Homey Pro (Early 2023) flows that require Docker, the dev container has the Docker CLI and a mounted Docker socket so `homey` can use Docker from inside the container.
+- If you need additional Node versions, use `nvm` or adjust the devcontainer’s Node feature version.
+
+## Scaffold a Homey App (inside the devcontainer)
+
+Use Homey CLI to generate a starter app:
+
+```bash
+# From repo root inside the devcontainer
+homey app create
+
+# Suggested app ID for this repo (reverse-DNS):
+# com.unraid
+```
+
+Follow the interactive prompts. After creation:
+
+```bash
+cd com.unraid
+homey app run
+```
+
+## Lint & Format
+
+ESLint and Prettier are configured in the repo.
+
+```bash
+npm run lint
+npm run format
+```
+
+## GitHub & AI CLI Tools
+
+The devcontainer installs these command-line tools:
+
+- `gh`: GitHub CLI
+- `gh copilot`: Copilot CLI (installed as a `gh` extension)
+- `claude`: Official Anthropic Claude Code CLI
+
+### Authenticate GitHub CLI
+
+```bash
+gh auth login
+# Follow prompts to sign in
+```
+
+### Use Copilot from the terminal
+
+```bash
+# Examples (see gh extension help for full list)
+gh copilot explain --source .
+gh copilot suggest -m "Add a Homey flow card"
+gh copilot chat
+```
+
+### Use Claude Code (official CLI)
+
+Install is automated by the devcontainer. To use:
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+claude --help
+
+# Start a project-aware session in this repo
+claude chat
+
+# Ask for a change and apply edits interactively
+claude code "Add a driver and device skeleton for Unraid" --apply
+```
+
+Help:
+
+```bash
+gh copilot --help
+claude --help
+```
+
+
 # Unraid Homey App Development Guide
 
 A comprehensive guide for developers building a Homey app that mirrors the Home Assistant Unraid integration architecture using TypeScript and Zod validation.
