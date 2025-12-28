@@ -1,16 +1,57 @@
 # Environment
 /env.json
-.env*
+.env
+.env.*
+.env.local
 
 # Dependencies
-/node_modules/
+node_modules/
 
 # Build output
 /.homeybuild/
+dist/
+build/
+*.js
+*.js.map
+*.d.ts
+!vitest.config.ts
+
+# TypeScript
+*.tsbuildinfo
 
 # Test coverage
-/coverage/
+coverage/
 
-# IDE
+# IDE & Editors
 .idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+*~
+
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# Homey specific
+env.json
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Debug scripts output
+debug-output/
