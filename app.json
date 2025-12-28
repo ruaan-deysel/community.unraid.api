@@ -185,6 +185,47 @@
         ]
       },
       {
+        "id": "disk-usage-high",
+        "title": {
+          "en": "Disk usage is high"
+        },
+        "titleFormatted": {
+          "en": "Disk usage exceeds 90%"
+        },
+        "hint": {
+          "en": "Triggered when a disk's usage exceeds 90%."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=unraid-server"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "disk_name",
+            "type": "string",
+            "title": {
+              "en": "Disk name"
+            },
+            "example": {
+              "en": "disk1"
+            }
+          },
+          {
+            "name": "usage_percent",
+            "type": "number",
+            "title": {
+              "en": "Usage %"
+            },
+            "example": {
+              "en": "92"
+            }
+          }
+        ]
+      },
+      {
         "id": "disk-warning",
         "title": {
           "en": "Disk health warning"
@@ -616,6 +657,48 @@
             },
             "placeholder": {
               "en": "50"
+            },
+            "min": 0,
+            "max": 100,
+            "step": 1
+          }
+        ]
+      },
+      {
+        "id": "disk-usage-above",
+        "title": {
+          "en": "Disk usage is above"
+        },
+        "titleFormatted": {
+          "en": "Disk [[disk_name]] usage is above [[threshold]]%"
+        },
+        "hint": {
+          "en": "Check if a disk's usage is above a threshold percentage."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=unraid-server"
+          },
+          {
+            "type": "autocomplete",
+            "name": "disk_name",
+            "title": {
+              "en": "Disk"
+            },
+            "placeholder": {
+              "en": "Select disk..."
+            }
+          },
+          {
+            "type": "number",
+            "name": "threshold",
+            "title": {
+              "en": "Threshold"
+            },
+            "placeholder": {
+              "en": "80"
             },
             "min": 0,
             "max": 100,

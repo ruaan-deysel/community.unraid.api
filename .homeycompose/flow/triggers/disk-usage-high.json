@@ -1,0 +1,41 @@
+{
+  "id": "disk-usage-high",
+  "title": {
+    "en": "Disk usage is high"
+  },
+  "titleFormatted": {
+    "en": "Disk usage exceeds 90%"
+  },
+  "hint": {
+    "en": "Triggered when a disk's usage exceeds 90%."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=unraid-server"
+    }
+  ],
+  "tokens": [
+    {
+      "name": "disk_name",
+      "type": "string",
+      "title": {
+        "en": "Disk name"
+      },
+      "example": {
+        "en": "disk1"
+      }
+    },
+    {
+      "name": "usage_percent",
+      "type": "number",
+      "title": {
+        "en": "Usage %"
+      },
+      "example": {
+        "en": "92"
+      }
+    }
+  ]
+}

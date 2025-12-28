@@ -64,6 +64,10 @@ interface DiskInfo {
   status: string;
   temp: number | null;
   spinning: boolean;
+  fsSize: number | null;
+  fsFree: number | null;
+  fsUsed: number | null;
+  usagePercent: number | null;
 }
 
 /**
@@ -108,8 +112,10 @@ class UnraidServerDevice extends Homey.Device {
   private lastLowBatteryAlerted: boolean = false;
   private knownShares: Map<string, ShareInfo> = new Map();
   private highTempDisks: Set<string> = new Set();
+  private highUsageDisks: Set<string> = new Set();
   private highUsageShares: Set<string> = new Set();
   private readonly DISK_TEMP_WARNING = 50; // °C
+  private readonly DISK_USAGE_WARNING = 90; // %
   private readonly SHARE_USAGE_WARNING = 90; // %
   private readonly UPS_LOW_BATTERY = 20; // %
 
@@ -418,6 +424,7 @@ async onInit(): Promise<void> {
     // Response schema matching the actual Unraid API structure
     // Note: isSpinning is included to track disk standby state
     // This field is returned by the API without waking the disk
+    // fsSize, fsFree, fsUsed provide individual disk usage data
     const responseSchema = z.object({
       array: z.object({
         state: z.string(),
@@ -440,6 +447,10 @@ async onInit(): Promise<void> {
           status: z.string(),
           temp: z.number().nullable(),
           isSpinning: z.boolean().nullable().optional(),
+          fsSize: z.number().nullable().optional(),
+          fsFree: z.number().nullable().optional(),
+          fsUsed: z.number().nullable().optional(),
+          type: z.string().optional(),
         })),
       }),
     });
@@ -449,6 +460,7 @@ async onInit(): Promise<void> {
     // Query array.disks - this does NOT wake sleeping disks
     // Temperature is only populated for spinning disks (null for standby)
     // isSpinning tells us if disk is active without waking it
+    // fsSize, fsFree, fsUsed provide individual disk usage
     const query = `
       query {
         array {
@@ -472,6 +484,10 @@ async onInit(): Promise<void> {
             status
             temp
             isSpinning
+            fsSize
+            fsFree
+            fsUsed
+            type
           }
         }
       }
@@ -565,16 +581,40 @@ async onInit(): Promise<void> {
       this.lastParityStatus = currentParityStatus;
       this.lastParityProgress = parityStatus.progress;
 
-      // Update known disks for autocomplete
+      // Update known disks for autocomplete (with usage data)
       // Note: isSpinning comes from array.disks which doesn't wake sleeping disks
+      // Parity disks (type=PARITY) don't have filesystem usage, only data disks do
       result.array.disks.forEach((disk) => {
+        const fsSize = disk.fsSize ?? null;
+        const fsFree = disk.fsFree ?? null;
+        const fsUsed = disk.fsUsed ?? null;
+        const usagePercent = fsSize && fsSize > 0 && fsUsed !== null
+          ? (fsUsed / fsSize) * 100
+          : null;
+
         this.knownDisks.set(disk.id, {
           id: disk.id,
           name: disk.name,
           status: disk.status,
           temp: disk.temp,
           spinning: disk.isSpinning ?? true,
+          fsSize,
+          fsFree,
+          fsUsed,
+          usagePercent,
         });
+
+        // Check disk usage high (only for data disks with filesystem)
+        if (usagePercent !== null && usagePercent >= this.DISK_USAGE_WARNING) {
+          if (!this.highUsageDisks.has(disk.name)) {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            this.triggerDiskUsageHigh(disk.name, usagePercent);
+            this.highUsageDisks.add(disk.name);
+          }
+        } else {
+          // Remove from high usage set when usage goes below threshold
+          this.highUsageDisks.delete(disk.name);
+        }
       });
 
       // Check disk health - DISK_OK is healthy status
@@ -894,6 +934,15 @@ async onInit(): Promise<void> {
     const trigger = this.homey.flow.getDeviceTriggerCard('disk-temp-high');
     await trigger.trigger(this, { disk_name: diskName, temperature });
     this.log(`Disk temp high flow triggered for ${diskName}: ${temperature}°C`);
+  }
+
+  /**
+   * Trigger disk usage high flow
+   */
+  private async triggerDiskUsageHigh(diskName: string, usagePercent: number): Promise<void> {
+    const trigger = this.homey.flow.getDeviceTriggerCard('disk-usage-high');
+    await trigger.trigger(this, { disk_name: diskName, usage_percent: Math.round(usagePercent) });
+    this.log(`Disk usage high flow triggered for ${diskName}: ${Math.round(usagePercent)}%`);
   }
 
   /**
@@ -1313,6 +1362,20 @@ async onInit(): Promise<void> {
         async () => this.getDiskAutocomplete(),
       );
 
+    // Disk usage above threshold condition card
+    this.homey.flow.getConditionCard('disk-usage-above')
+      .registerRunListener(async (args: Record<string, { id: string; name: string } | number>) => {
+        const diskArg = args['disk_name'] as { id: string; name: string };
+        const threshold = args['threshold'] as number;
+        const disk = this.knownDisks.get(diskArg.id);
+        if (!disk || disk.usagePercent === null) return false;
+        return disk.usagePercent > threshold;
+      })
+      .registerArgumentAutocompleteListener(
+        'disk_name',
+        async () => this.getDataDiskAutocomplete(),
+      );
+
     // ========================================================================
     // Action Cards
     // ========================================================================
@@ -1533,6 +1596,27 @@ async onInit(): Promise<void> {
         id: disk.id,
         name: disk.name,
       });
+    });
+    return disks.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  /**
+   * Get autocomplete options for data disks only (disks with filesystem usage)
+   * Excludes parity disks which don't have filesystem usage data
+   */
+  private getDataDiskAutocomplete(): Array<{ id: string; name: string; description: string }> {
+    const disks: Array<{ id: string; name: string; description: string }> = [];
+    this.knownDisks.forEach((disk) => {
+      // Only include disks that have filesystem usage data
+      if (disk.usagePercent !== null) {
+        const usedTB = disk.fsUsed ? Math.round((disk.fsUsed / (1024 ** 4)) * 10) / 10 : 0;
+        const sizeTB = disk.fsSize ? Math.round((disk.fsSize / (1024 ** 4)) * 10) / 10 : 0;
+        disks.push({
+          id: disk.id,
+          name: disk.name,
+          description: `${Math.round(disk.usagePercent)}% used (${usedTB}/${sizeTB} TB)`,
+        });
+      }
     });
     return disks.sort((a, b) => a.name.localeCompare(b.name));
   }
