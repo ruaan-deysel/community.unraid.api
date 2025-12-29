@@ -1,5 +1,5 @@
 {
-  "name": "com.unraid",
+  "name": "community.unraid.homey",
   "version": "1.0.0",
   "scripts": {
     "build": "tsc",

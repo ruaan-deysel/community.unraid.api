@@ -42,9 +42,9 @@
     }
   },
   "bugs": {
-    "url": "https://github.com/ruaan-deysel/com.unraid/issues"
+    "url": "https://github.com/ruaan-deysel/community.unraid.homey/issues"
   },
-  "source": "https://github.com/ruaan-deysel/com.unraid",
-  "homepage": "https://github.com/ruaan-deysel/com.unraid",
-  "support": "https://github.com/ruaan-deysel/com.unraid/issues"
+  "source": "https://github.com/ruaan-deysel/community.unraid.homey",
+  "homepage": "https://github.com/ruaan-deysel/community.unraid.homey",
+  "support": "https://github.com/ruaan-deysel/community.unraid.homey/issues"
 }
