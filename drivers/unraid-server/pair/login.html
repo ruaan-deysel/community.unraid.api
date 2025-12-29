@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connect to Unraid Server</title>
+  <link rel="stylesheet" href="https://homey-cdn.athom.com/homey-css/1.0.0/homey.min.css">
+  <style>
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #007aff;
+    }
+    .form-hint {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #888;
+    }
+    .btn-connect {
+      width: 100%;
+      padding: 14px;
+      background: #007aff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background-color 0.2s;
+    }
+    .btn-connect:hover {
+      background: #0056b3;
+    }
+    .btn-connect:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .intro-text {
+      margin-bottom: 20px;
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="homey-content">
+    <form id="login-form">
+      <p class="intro-text">Enter your Unraid server connection details below.</p>
+      
+      <div class="form-group">
+        <label class="form-label" for="host">Server Address</label>
+        <input type="text" id="host" class="form-input" placeholder="192.168.1.100 or tower.local" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+        <p class="form-hint">IP address or hostname of your Unraid server</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="apiKey">API Key</label>
+        <input type="password" id="apiKey" class="form-input" placeholder="Enter your Unraid API key" autocomplete="off" required>
+        <p class="form-hint">Find this in Unraid Settings → Management Access → API Keys</p>
+      </div>
+      
+      <button type="submit" id="connectBtn" class="btn-connect">Connect</button>
+    </form>
+  </div>
+
+  <script src="https://homey-cdn.athom.com/homey-js/1.0.0/homey.min.js"></script>
+  <script>
+    Homey.setTitle('Connect to Unraid');
+    document.getElementById('host').focus();
+
+    var form = document.getElementById('login-form');
+    
+    form.onsubmit = function(event) {
+      event.preventDefault();
+      
+      var host = document.getElementById('host').value.trim();
+      var apiKey = document.getElementById('apiKey').value.trim();
+
+      if (!host || !apiKey) {
+        Homey.alert('Please fill in all fields', 'error');
+        return;
+      }
+
+      // Show loading overlay
+      Homey.showLoadingOverlay();
+
+      // Emit login event to backend
+      Homey.emit('login', { host: host, apiKey: apiKey })
+        .then(function(result) {
+          if (result === true) {
+            // Login successful - navigate to device list
+            Homey.showView('list_devices');
+          }
+        })
+        .catch(function(err) {
+          Homey.hideLoadingOverlay();
+          Homey.alert(err.message || 'Failed to connect to Unraid server', 'error');
+        });
+    };
+  </script>
+</body>
+</html>

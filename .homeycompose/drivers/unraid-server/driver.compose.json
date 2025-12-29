@@ -50,32 +50,16 @@
   },
   "pair": [
     {
-      "id": "host",
-      "template": "host",
+      "id": "login",
       "navigation": {
-        "next": "api_key"
-      }
-    },
-    {
-      "id": "api_key",
-      "template": "api_key",
-      "navigation": {
-        "prev": "host",
-        "next": "test_connection"
-      }
-    },
-    {
-      "id": "test_connection",
-      "template": "test_connection",
-      "navigation": {
-        "prev": "api_key"
+        "next": "list_devices"
       }
     },
     {
       "id": "list_devices",
       "template": "list_devices",
       "navigation": {
-        "prev": "test_connection"
+        "prev": "login"
       }
     }
   ],

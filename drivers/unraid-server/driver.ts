@@ -54,32 +54,13 @@ class UnraidServerDriver extends Homey.Driver {
       apiKey: '',
     };
 
-    // Handle host data from the first view
-    session.setHandler('getHostData', async () => {
-      return {
-        host: pairingData.host,
-      };
-    });
-
-    session.setHandler('setHostData', async (data: { host: string }) => {
-      this.log('Setting host data:', data.host);
+    // Handle login from the single login view
+    session.setHandler('login', async (data: { host: string; apiKey: string }) => {
+      this.log('Login attempt for:', data.host);
       pairingData.host = data.host;
-    });
+      pairingData.apiKey = data.apiKey;
 
-    // Handle API key from the second view
-    session.setHandler('getApiKey', async () => {
-      return pairingData.apiKey;
-    });
-
-    session.setHandler('setApiKey', async (apiKey: string) => {
-      this.log('API key received');
-      pairingData.apiKey = apiKey;
-    });
-
-    // Handle list_devices view - validate connection and create the device
-    session.setHandler('list_devices', async () => {
-      this.log('Validating connection to', pairingData.host);
-
+      // Validate connection immediately
       const config: UnraidClientConfig = {
         host: pairingData.host,
         apiKey: pairingData.apiKey,
@@ -87,21 +68,24 @@ class UnraidServerDriver extends Homey.Driver {
         allowSelfSigned: true,
       };
 
-      // Try to fetch server info - this validates the connection
-      let hostname = pairingData.host;
       try {
-        this.log('Fetching server info...');
+        this.log('Testing connection...');
         const serverInfo = await this.fetchServerInfo(config);
         pairingData.serverInfo = serverInfo;
-        hostname = serverInfo.hostname;
-        this.log('Server info fetched:', serverInfo.hostname, serverInfo.version);
+        this.log('Connection successful:', serverInfo.hostname);
+        return true;
       } catch (err) {
-        // If we can't connect, throw error to show in pairing UI
         const errorMsg = err instanceof Error ? err.message : 'Unknown error';
         this.error('Connection failed:', errorMsg);
-        // Show the actual error message to help with debugging
-        throw new Error(`Could not connect to Unraid server. ${errorMsg}`);
+        throw new Error(`Could not connect: ${errorMsg}`);
       }
+    });
+
+    // Handle list_devices view - create the device
+    session.setHandler('list_devices', async () => {
+      this.log('Creating device for', pairingData.host);
+
+      const hostname = pairingData.serverInfo?.hostname || pairingData.host;
 
       const device = {
         name: `Unraid: ${hostname}`,
@@ -116,7 +100,7 @@ class UnraidServerDriver extends Homey.Driver {
         } as DeviceData,
       };
 
-      this.log('Creating device:', device.name);
+      this.log('Device created:', device.name);
       return [device];
     });
   }
