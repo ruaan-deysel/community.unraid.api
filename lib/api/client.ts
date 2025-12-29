@@ -494,491 +494,330 @@ export function clearRedirectCache(): void {
   redirectUrlCache.clear();
 }
 
-// ========================================================================
-// Mutation Schemas
-// ========================================================================
-
-/**
- * Schema for container mutation response
- */
-const ContainerMutationSchema = z.object({
-  docker: z.object({
-    start: z.object({
-      id: z.string(),
-      state: z.string(),
-      status: z.string(),
-    }).optional(),
-    stop: z.object({
-      id: z.string(),
-      state: z.string(),
-      status: z.string(),
-    }).optional(),
-    restart: z.object({
-      id: z.string(),
-      state: z.string(),
-      status: z.string(),
-    }).optional(),
-  }),
-});
-
-/**
- * Schema for VM mutation response
- */
-const VMMutationSchema = z.object({
-  vm: z.object({
-    start: z.boolean().optional(),
-    stop: z.boolean().optional(),
-  }),
-});
-
-/**
- * Schema for array mutation response
- */
-const ArrayMutationSchema = z.object({
-  array: z.object({
-    setState: z.object({
-      id: z.string(),
-      state: z.string(),
-    }),
-  }),
-});
-
-/**
- * Schema for parity check mutation response
- */
-const ParityCheckMutationSchema = z.object({
-  parityCheck: z.object({
-    start: z.boolean().optional(),
-    pause: z.boolean().optional(),
-    resume: z.boolean().optional(),
-    cancel: z.boolean().optional(),
-  }),
-});
-
-/**
- * Schema for disk spin mutation response
- */
-const DiskSpinMutationSchema = z.object({
-  disk: z.object({
-    spinUp: z.boolean().optional(),
-    spinDown: z.boolean().optional(),
-  }),
-});
-
-// ========================================================================
-// Container Control Functions
-// ========================================================================
+// =============================================================================
+// Docker Container Mutations
+// =============================================================================
 
 /**
  * Start a Docker container
- * @param config - Client configuration
- * @param containerId - Container ID to start
- * @returns Container state after starting
  */
 export async function startContainer(
   config: UnraidClientConfig,
-  containerId: string,
-): Promise<{ id: string; state: string; status: string }> {
+  containerId: string
+): Promise<{ id: string; state: string }> {
   const mutation = `
-    mutation StartContainer($id: PrefixedID!) {
-      docker {
-        start(id: $id) {
-          id
-          state
-          status
-        }
+    mutation StartContainer($id: ID!) {
+      dockerContainerStart(id: $id) {
+        id
+        state
       }
     }
   `;
-
-  const result = await executeQuery(
-    config,
-    mutation,
-    { id: containerId },
-    ContainerMutationSchema,
-  );
-
-  if (!result.docker.start) {
-    throw new UnraidApiError({
-      code: 'OPERATION_FAILED',
-      message: 'Failed to start container - no response data',
-      retryable: false,
-    });
-  }
-
-  return result.docker.start;
+  const schema = z.object({
+    dockerContainerStart: z.object({
+      id: z.string(),
+      state: z.string(),
+    }),
+  });
+  const result = await executeQuery(config, mutation, { id: containerId }, schema);
+  return result.dockerContainerStart;
 }
 
 /**
  * Stop a Docker container
- * @param config - Client configuration
- * @param containerId - Container ID to stop
- * @returns Container state after stopping
  */
 export async function stopContainer(
   config: UnraidClientConfig,
-  containerId: string,
-): Promise<{ id: string; state: string; status: string }> {
+  containerId: string
+): Promise<{ id: string; state: string }> {
   const mutation = `
-    mutation StopContainer($id: PrefixedID!) {
-      docker {
-        stop(id: $id) {
-          id
-          state
-          status
-        }
+    mutation StopContainer($id: ID!) {
+      dockerContainerStop(id: $id) {
+        id
+        state
       }
     }
   `;
-
-  const result = await executeQuery(
-    config,
-    mutation,
-    { id: containerId },
-    ContainerMutationSchema,
-  );
-
-  if (!result.docker.stop) {
-    throw new UnraidApiError({
-      code: 'OPERATION_FAILED',
-      message: 'Failed to stop container - no response data',
-      retryable: false,
-    });
-  }
-
-  return result.docker.stop;
+  const schema = z.object({
+    dockerContainerStop: z.object({
+      id: z.string(),
+      state: z.string(),
+    }),
+  });
+  const result = await executeQuery(config, mutation, { id: containerId }, schema);
+  return result.dockerContainerStop;
 }
 
 /**
  * Restart a Docker container
- * @param config - Client configuration
- * @param containerId - Container ID to restart
- * @returns Container state after restarting
  */
 export async function restartContainer(
   config: UnraidClientConfig,
-  containerId: string,
-): Promise<{ id: string; state: string; status: string }> {
+  containerId: string
+): Promise<{ id: string; state: string }> {
   const mutation = `
-    mutation RestartContainer($id: PrefixedID!) {
-      docker {
-        restart(id: $id) {
-          id
-          state
-          status
-        }
+    mutation RestartContainer($id: ID!) {
+      dockerContainerRestart(id: $id) {
+        id
+        state
       }
     }
   `;
-
-  const result = await executeQuery(
-    config,
-    mutation,
-    { id: containerId },
-    ContainerMutationSchema,
-  );
-
-  if (!result.docker.restart) {
-    throw new UnraidApiError({
-      code: 'OPERATION_FAILED',
-      message: 'Failed to restart container - no response data',
-      retryable: false,
-    });
-  }
-
-  return result.docker.restart;
+  const schema = z.object({
+    dockerContainerRestart: z.object({
+      id: z.string(),
+      state: z.string(),
+    }),
+  });
+  const result = await executeQuery(config, mutation, { id: containerId }, schema);
+  return result.dockerContainerRestart;
 }
 
-// ========================================================================
-// VM Control Functions
-// ========================================================================
+// =============================================================================
+// VM Mutations
+// =============================================================================
 
 /**
- * Start a Virtual Machine
- * @param config - Client configuration
- * @param vmId - VM ID to start
- * @returns Success boolean
+ * Start a VM
  */
 export async function startVM(
   config: UnraidClientConfig,
-  vmId: string,
-): Promise<boolean> {
+  vmId: string
+): Promise<{ id: string; state: string }> {
   const mutation = `
-    mutation StartVM($id: PrefixedID!) {
-      vm {
-        start(id: $id)
+    mutation StartVM($id: ID!) {
+      vmStart(id: $id) {
+        id
+        state
       }
     }
   `;
-
-  const result = await executeQuery(
-    config,
-    mutation,
-    { id: vmId },
-    VMMutationSchema,
-  );
-
-  return result.vm.start === true;
+  const schema = z.object({
+    vmStart: z.object({
+      id: z.string(),
+      state: z.string(),
+    }),
+  });
+  const result = await executeQuery(config, mutation, { id: vmId }, schema);
+  return result.vmStart;
 }
 
 /**
- * Stop a Virtual Machine
- * @param config - Client configuration
- * @param vmId - VM ID to stop
- * @returns Success boolean
+ * Stop a VM
  */
 export async function stopVM(
   config: UnraidClientConfig,
-  vmId: string,
-): Promise<boolean> {
+  vmId: string
+): Promise<{ id: string; state: string }> {
   const mutation = `
-    mutation StopVM($id: PrefixedID!) {
-      vm {
-        stop(id: $id)
+    mutation StopVM($id: ID!) {
+      vmStop(id: $id) {
+        id
+        state
       }
     }
   `;
-
-  const result = await executeQuery(
-    config,
-    mutation,
-    { id: vmId },
-    VMMutationSchema,
-  );
-
-  return result.vm.stop === true;
+  const schema = z.object({
+    vmStop: z.object({
+      id: z.string(),
+      state: z.string(),
+    }),
+  });
+  const result = await executeQuery(config, mutation, { id: vmId }, schema);
+  return result.vmStop;
 }
 
-// ========================================================================
-// Array Control Functions
-// ========================================================================
+// =============================================================================
+// Array Mutations
+// =============================================================================
 
 /**
- * Start the Unraid array
- * WARNING: This is a critical system operation
- * @param config - Client configuration
- * @returns Array state after starting
+ * Start the array
  */
 export async function startArray(
-  config: UnraidClientConfig,
-): Promise<{ id: string; state: string }> {
+  config: UnraidClientConfig
+): Promise<{ state: string }> {
   const mutation = `
     mutation StartArray {
-      array {
-        setState(input: { desiredState: START }) {
-          id
-          state
-        }
+      arrayAction(action: START) {
+        state
       }
     }
   `;
-
-  const result = await executeQuery(
-    config,
-    mutation,
-    {},
-    ArrayMutationSchema,
-  );
-
-  return result.array.setState;
+  const schema = z.object({
+    arrayAction: z.object({
+      state: z.string(),
+    }),
+  });
+  const result = await executeQuery(config, mutation, {}, schema);
+  return result.arrayAction;
 }
 
 /**
- * Stop the Unraid array
- * WARNING: This is a critical system operation that will stop all containers and VMs using array storage
- * @param config - Client configuration
- * @returns Array state after stopping
+ * Stop the array
  */
 export async function stopArray(
-  config: UnraidClientConfig,
-): Promise<{ id: string; state: string }> {
+  config: UnraidClientConfig
+): Promise<{ state: string }> {
   const mutation = `
     mutation StopArray {
-      array {
-        setState(input: { desiredState: STOP }) {
-          id
-          state
-        }
+      arrayAction(action: STOP) {
+        state
       }
     }
   `;
-
-  const result = await executeQuery(
-    config,
-    mutation,
-    {},
-    ArrayMutationSchema,
-  );
-
-  return result.array.setState;
+  const schema = z.object({
+    arrayAction: z.object({
+      state: z.string(),
+    }),
+  });
+  const result = await executeQuery(config, mutation, {}, schema);
+  return result.arrayAction;
 }
 
-// ========================================================================
-// Parity Check Control Functions
-// ========================================================================
+// =============================================================================
+// Parity Check Mutations
+// =============================================================================
 
 /**
  * Start a parity check
- * @param config - Client configuration
- * @param correct - If true, write corrections to parity. If false, only check (read-only)
- * @returns Success boolean
  */
 export async function startParityCheck(
   config: UnraidClientConfig,
-  correct = false,
-): Promise<boolean> {
+  correct: boolean = false
+): Promise<{ state: string }> {
   const mutation = `
     mutation StartParityCheck($correct: Boolean!) {
-      parityCheck {
-        start(correct: $correct)
+      parityCheckStart(correct: $correct) {
+        state
       }
     }
   `;
-
-  const result = await executeQuery(
-    config,
-    mutation,
-    { correct },
-    ParityCheckMutationSchema,
-  );
-
-  return result.parityCheck.start === true;
+  const schema = z.object({
+    parityCheckStart: z.object({
+      state: z.string(),
+    }),
+  });
+  const result = await executeQuery(config, mutation, { correct }, schema);
+  return result.parityCheckStart;
 }
 
 /**
- * Pause a running parity check
- * @param config - Client configuration
- * @returns Success boolean
+ * Pause a parity check
  */
 export async function pauseParityCheck(
-  config: UnraidClientConfig,
-): Promise<boolean> {
+  config: UnraidClientConfig
+): Promise<{ state: string }> {
   const mutation = `
     mutation PauseParityCheck {
-      parityCheck {
-        pause
+      parityCheckPause {
+        state
       }
     }
   `;
-
-  const result = await executeQuery(
-    config,
-    mutation,
-    {},
-    ParityCheckMutationSchema,
-  );
-
-  return result.parityCheck.pause === true;
+  const schema = z.object({
+    parityCheckPause: z.object({
+      state: z.string(),
+    }),
+  });
+  const result = await executeQuery(config, mutation, {}, schema);
+  return result.parityCheckPause;
 }
 
 /**
- * Resume a paused parity check
- * @param config - Client configuration
- * @returns Success boolean
+ * Resume a parity check
  */
 export async function resumeParityCheck(
-  config: UnraidClientConfig,
-): Promise<boolean> {
+  config: UnraidClientConfig
+): Promise<{ state: string }> {
   const mutation = `
     mutation ResumeParityCheck {
-      parityCheck {
-        resume
+      parityCheckResume {
+        state
       }
     }
   `;
-
-  const result = await executeQuery(
-    config,
-    mutation,
-    {},
-    ParityCheckMutationSchema,
-  );
-
-  return result.parityCheck.resume === true;
+  const schema = z.object({
+    parityCheckResume: z.object({
+      state: z.string(),
+    }),
+  });
+  const result = await executeQuery(config, mutation, {}, schema);
+  return result.parityCheckResume;
 }
 
 /**
- * Cancel/stop a running parity check
- * @param config - Client configuration
- * @returns Success boolean
+ * Cancel a parity check
  */
 export async function cancelParityCheck(
-  config: UnraidClientConfig,
-): Promise<boolean> {
+  config: UnraidClientConfig
+): Promise<{ state: string }> {
   const mutation = `
     mutation CancelParityCheck {
-      parityCheck {
-        cancel
+      parityCheckCancel {
+        state
       }
     }
   `;
-
-  const result = await executeQuery(
-    config,
-    mutation,
-    {},
-    ParityCheckMutationSchema,
-  );
-
-  return result.parityCheck.cancel === true;
+  const schema = z.object({
+    parityCheckCancel: z.object({
+      state: z.string(),
+    }),
+  });
+  const result = await executeQuery(config, mutation, {}, schema);
+  return result.parityCheckCancel;
 }
 
-// ========================================================================
-// Disk Control Functions
-// ========================================================================
+// =============================================================================
+// Disk Mutations
+// =============================================================================
 
 /**
  * Spin up a disk
- * @param config - Client configuration
- * @param diskId - Disk ID to spin up
- * @returns Success boolean
  */
 export async function spinUpDisk(
   config: UnraidClientConfig,
-  diskId: string,
-): Promise<boolean> {
+  diskName: string
+): Promise<{ name: string; status: string }> {
   const mutation = `
-    mutation SpinUpDisk($id: String!) {
-      disk {
-        spinUp(id: $id)
+    mutation SpinUpDisk($name: String!) {
+      diskSpinUp(name: $name) {
+        name
+        status
       }
     }
   `;
-
-  const result = await executeQuery(
-    config,
-    mutation,
-    { id: diskId },
-    DiskSpinMutationSchema,
-  );
-
-  return result.disk.spinUp === true;
+  const schema = z.object({
+    diskSpinUp: z.object({
+      name: z.string(),
+      status: z.string(),
+    }),
+  });
+  const result = await executeQuery(config, mutation, { name: diskName }, schema);
+  return result.diskSpinUp;
 }
 
 /**
  * Spin down a disk
- * @param config - Client configuration
- * @param diskId - Disk ID to spin down
- * @returns Success boolean
  */
 export async function spinDownDisk(
   config: UnraidClientConfig,
-  diskId: string,
-): Promise<boolean> {
+  diskName: string
+): Promise<{ name: string; status: string }> {
   const mutation = `
-    mutation SpinDownDisk($id: String!) {
-      disk {
-        spinDown(id: $id)
+    mutation SpinDownDisk($name: String!) {
+      diskSpinDown(name: $name) {
+        name
+        status
       }
     }
   `;
-
-  const result = await executeQuery(
-    config,
-    mutation,
-    { id: diskId },
-    DiskSpinMutationSchema,
-  );
-
-  return result.disk.spinDown === true;
+  const schema = z.object({
+    diskSpinDown: z.object({
+      name: z.string(),
+      status: z.string(),
+    }),
+  });
+  const result = await executeQuery(config, mutation, { name: diskName }, schema);
+  return result.diskSpinDown;
 }

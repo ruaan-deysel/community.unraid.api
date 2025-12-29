@@ -1204,7 +1204,14 @@
         "en": "Unraid Server"
       },
       "class": "other",
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
       "capabilities": [
+        "measure_power",
         "cpu_usage",
         "cpu_temperature",
         "cpu_power",
@@ -1229,9 +1236,12 @@
         "ups_power",
         "ups_runtime"
       ],
-      "energy": {
-        "approximation": {
-          "usageConstant": 0
+      "capabilitiesOptions": {
+        "measure_power": {
+          "title": {
+            "en": "Server Power"
+          },
+          "approximated": true
         }
       },
       "images": {
