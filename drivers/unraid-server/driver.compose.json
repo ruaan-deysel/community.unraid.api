@@ -7,7 +7,7 @@
     "local"
   ],
   "connectivity": [
-    "local"
+    "lan"
   ],
   "capabilities": [
     "cpu_usage",
