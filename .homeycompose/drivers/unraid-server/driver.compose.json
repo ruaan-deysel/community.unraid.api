@@ -6,6 +6,9 @@
   "platforms": [
     "local"
   ],
+  "connectivity": [
+    "local"
+  ],
   "capabilities": [
     "cpu_usage",
     "cpu_temperature",
