@@ -1,5 +1,5 @@
 {
-  "id": "community.unraid.homey",
+  "id": "community.unraid.api",
   "version": "1.0.0",
   "compatibility": ">=12.4.0",
   "sdk": 3,
@@ -8,7 +8,7 @@
   ],
   "brandColor": "#F15A2C",
   "name": {
-    "en": "Unraid"
+    "en": "Unraid API"
   },
   "description": {
     "en": "Monitor and control your Unraid server"
@@ -42,9 +42,9 @@
     }
   },
   "bugs": {
-    "url": "https://github.com/ruaan-deysel/community.unraid.homey/issues"
+    "url": "https://github.com/ruaan-deysel/community.unraid.api/issues"
   },
-  "source": "https://github.com/ruaan-deysel/community.unraid.homey",
-  "homepage": "https://github.com/ruaan-deysel/community.unraid.homey",
-  "support": "https://github.com/ruaan-deysel/community.unraid.homey/issues"
+  "source": "https://github.com/ruaan-deysel/community.unraid.api",
+  "homepage": "https://github.com/ruaan-deysel/community.unraid.api",
+  "support": "https://github.com/ruaan-deysel/community.unraid.api/issues"
 }
