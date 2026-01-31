@@ -48,3 +48,6 @@ KEY FEATURES:
   - 15 trigger cards (array, containers, VMs, UPS, disk alerts)
   - 13 condition cards (CPU, memory, temperature, container/VM states)
   - 14 action cards (container/VM control, array management, parity checks)
+
+---
+Unraid® is a trademark of Lime Technology, Inc. Not affiliated.
