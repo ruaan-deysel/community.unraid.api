@@ -78,3 +78,8 @@ npx homey app run
 
 ---
 Note: README.txt is kept for Homey App Store publishing; this README.md is for developers.
+
+---
+## Trademark Notice
+
+Unraid® is a registered trademark of Lime Technology, Inc. This application is not affiliated with, endorsed, or sponsored by Lime Technology, Inc.
